@@ -38,14 +38,15 @@ Status - Default to "To Do" unless specified otherwise
 Tech Stack
 ==========
 Frontend
-Framework: React
-Styling: TBD
-State Management: Redux (TBD)
-Voice Input: TBD
+Framework: React (Vite)
+Styling: Tailwind CSS
+State Management: React Query + useState
+Voice Input: OpenAI Whisper API
 
 Backend
 Framework: Node.js with Express
-Database: MySQL / PostgreSQL (TBD)
+ORM: Prisma
+Database: PostgreSQL (Supabase)
 API Design: RESTful APIs
 
 Things to Do
@@ -55,3 +56,4 @@ Things to Do
 3. Note all assumptions made
 4. Input validation and error handling in REST APIs
 5. Responsive Design
+6. Update this once final tech stack is decided

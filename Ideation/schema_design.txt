@@ -1,0 +1,38 @@
+Task
+====
+ID: Int 
+Title: String
+Description: String
+Due Date: DateTime
+Priority: Enum
+Status: Enum
+Project: Related to Project ID
+Assignee: Related to User ID <Future Scope>
+Reporter: Related to User ID <Future Scope>
+Depends On: Related to Task ID <Future Scope>
+Blocked By: Related to Task ID <Future Scope>
+Created At: DateTime
+Updated At: DateTime
+
+Project
+=======
+ID: Int
+Name: String
+Description: String
+Tasks: List of Task
+Users: List of Users (+Permissions) <Future Scope>
+
+User <Future Scope>
+===================
+ID: Int
+Name: String
+Email: String
+Password: String (Needs hashes + Salts or Tokens)
+
+Priority (Enum)
+===============
+Low / Medium / High
+
+Status (Enum)
+=============
+To Do, In Progress, Done
