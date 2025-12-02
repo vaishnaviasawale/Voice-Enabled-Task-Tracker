@@ -1,0 +1,57 @@
+Requirements
+============
+
+1. Task - Title, Description, Due Date, Priority, Status
+Other Inputs - ID, Project, Assignee, Reporter, Depends On, Blocked By, Created
+At, Updated At
+2. Voice input should be parsed
+3. Board View (To Do, In Progress, Done)
+4. List View
+5. Task Details (Overwiew) - Title, Priority, Due Date, Status (Default "To Do")
+6. Should be able to edit tasks
+7. Move tasks between statuses by drag-and-drop 
+8. Delete tasks (Ask for confirmation first)
+9. Filter tasks by status, priority, due date
+10. Search tasks by title or description
+11. User Authentication and Authorization (Handle User Schema) (TBD)
+12. Email Sending (TBD)
+13. Project View (Handle Project Schema) (TBD)
+
+Voice Input Feature
+===================
+1. Microphone button to start/stop recording
+2. Convert speech to text
+3. Extract data from above - Title, Due Date, Priority, Status
+Note: 
+Title - The main task description
+Due Date - Parse relative dates ("tomorrow", "next Monday", "in 3
+days") and absolute dates ("15th January", "Jan 20")
+Handle variations in phrasing (e.g., "due by Friday" vs "by Friday" vs
+"before Friday")
+Priority - Identify keywords like "urgent", "high priority", "low
+priority", "critical"
+Status - Default to "To Do" unless specified otherwise
+4. Show the extracted fields to the user and allow modification
+5. Use sensible defaults if fields cannot be extracted
+6. Dislay captured transcript
+
+Tech Stack
+==========
+Frontend
+Framework: React
+Styling: TBD
+State Management: Redux (TBD)
+Voice Input: TBD
+
+Backend
+Framework: Node.js with Express
+Database: MySQL / PostgreSQL (TBD)
+API Design: RESTful APIs
+
+Things to Do
+============
+1. Add unit tests
+2. Add README based on requirements mentioned
+3. Note all assumptions made
+4. Input validation and error handling in REST APIs
+5. Responsive Design
