@@ -16,6 +16,10 @@ app.use('/projects', projectRoutes);
 const taskRoutes = require('./routes/task');
 app.use('/tasks', taskRoutes);
 
+// Voice routes
+const voiceRoutes = require("./routes/voice");
+app.use('/voice', voiceRoutes);
+
 // Home route
 app.get('/', (req, res) => {
     res.send('Voice-Enabled Task Tracker Backend is running')
