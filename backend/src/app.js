@@ -8,7 +8,11 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-// Sample route
+// Project routes
+const projectRoutes = require('./routes/project');
+app.use('/projects', projectRoutes);
+
+// Home route
 app.get('/', (req, res) => {
     res.send('Voice-Enabled Task Tracker Backend is running')
 })
