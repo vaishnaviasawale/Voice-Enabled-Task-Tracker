@@ -12,6 +12,10 @@ app.use(express.json())
 const projectRoutes = require('./routes/project');
 app.use('/projects', projectRoutes);
 
+// Task routes
+const taskRoutes = require('./routes/task');
+app.use('/tasks', taskRoutes);
+
 // Home route
 app.get('/', (req, res) => {
     res.send('Voice-Enabled Task Tracker Backend is running')
