@@ -19,7 +19,7 @@ Project
 ID: Int
 Name: String
 Description: String
-Tasks: List of Task
+Tasks: List of Task <With Joins>
 Users: List of Users (+Permissions) <Future Scope>
 
 User <Future Scope>

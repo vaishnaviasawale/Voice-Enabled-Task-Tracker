@@ -45,8 +45,8 @@ Voice Input: OpenAI Whisper API
 
 Backend
 Framework: Node.js with Express
-ORM: Prisma
-Database: PostgreSQL (Supabase)
+ORM: Drizzle
+Database: SQLlite
 API Design: RESTful APIs
 
 Things to Do
