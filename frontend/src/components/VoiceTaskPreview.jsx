@@ -12,21 +12,21 @@ const getAuthHeaders = () => {
 
 const VoiceTaskPreview = ({ parsedTask, projectId, onClose, onTaskCreated }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
+
     // Editable fields initialized from parsed task
     const [title, setTitle] = useState(parsedTask.title || "");
     const [description, setDescription] = useState(parsedTask.description || "");
     const [priority, setPriority] = useState(parsedTask.priority || "MEDIUM");
     const [status, setStatus] = useState(parsedTask.status || "TODO");
     const [dueDate, setDueDate] = useState(
-        parsedTask.dueDate 
-            ? new Date(parsedTask.dueDate * 1000).toISOString().slice(0, 16) 
+        parsedTask.dueDate
+            ? new Date(parsedTask.dueDate * 1000).toISOString().slice(0, 16)
             : ""
     );
 
     const handleSubmit = async () => {
         if (!title.trim()) return;
-        
+
         setIsSubmitting(true);
         try {
             const res = await fetch(`${API_URL}/tasks`, {
@@ -41,15 +41,15 @@ const VoiceTaskPreview = ({ parsedTask, projectId, onClose, onTaskCreated }) => 
                     projectId,
                 }),
             });
-            
+
             if (!res.ok) throw new Error("Failed to create task");
             const newTask = await res.json();
-            
+
             // Notify parent of new task
             if (onTaskCreated) {
                 onTaskCreated(newTask);
             }
-            
+
             onClose();
         } catch (err) {
             console.error("Failed to create task:", err);
@@ -69,7 +69,7 @@ const VoiceTaskPreview = ({ parsedTask, projectId, onClose, onTaskCreated }) => 
     };
 
     return (
-        <div 
+        <div
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
             onClick={(e) => e.target === e.currentTarget && onClose()}
         >
@@ -77,10 +77,10 @@ const VoiceTaskPreview = ({ parsedTask, projectId, onClose, onTaskCreated }) => 
                 {/* Header */}
                 <div className="bg-purple-600 px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-2 text-white">
-                        <span className="text-xl">🎤</span>
+                        <span className="text-xl"> </span>
                         <h2 className="text-lg font-semibold">Voice Task Preview</h2>
                     </div>
-                    <button 
+                    <button
                         onClick={onClose}
                         className="text-purple-200 hover:text-white transition-colors"
                     >
@@ -109,7 +109,7 @@ const VoiceTaskPreview = ({ parsedTask, projectId, onClose, onTaskCreated }) => 
                             placeholder="Task title"
                         />
                     </div>
-                    
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                         <textarea
@@ -120,12 +120,12 @@ const VoiceTaskPreview = ({ parsedTask, projectId, onClose, onTaskCreated }) => 
                             placeholder="Add more details (optional)"
                         />
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            <select 
-                                value={status} 
+                            <select
+                                value={status}
                                 onChange={(e) => setStatus(e.target.value)}
                                 className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
                             >
@@ -134,11 +134,11 @@ const VoiceTaskPreview = ({ parsedTask, projectId, onClose, onTaskCreated }) => 
                                 <option value="DONE">Done</option>
                             </select>
                         </div>
-                        
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-                            <select 
-                                value={priority} 
+                            <select
+                                value={priority}
                                 onChange={(e) => setPriority(e.target.value)}
                                 className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
                             >
@@ -148,7 +148,7 @@ const VoiceTaskPreview = ({ parsedTask, projectId, onClose, onTaskCreated }) => 
                             </select>
                         </div>
                     </div>
-                    
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Due Date

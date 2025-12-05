@@ -1,6 +1,6 @@
 const fs = require("fs");
-const { extractTaskDetailsFree } = require("../services/nlpFree");
-const { transcribeAudioFree } = require("../services/transcribeFree");
+const { extractTaskDetails } = require("../services/nlp");
+const { transcribeAudio } = require("../services/transcribe");
 
 // Transcribe audio and parse to task
 exports.transcribeAndParse = async (req, res, next) => {
@@ -12,11 +12,11 @@ exports.transcribeAndParse = async (req, res, next) => {
         console.log(`Received audio file: ${req.file.originalname}, size: ${req.file.size} bytes`);
 
         // Transcribe audio using local Whisper
-        const transcript = await transcribeAudioFree(req.file.path);
+        const transcript = await transcribeAudio(req.file.path);
         console.log(`Transcript: "${transcript}"`);
 
         // Parse transcript to extract task fields
-        const task = extractTaskDetailsFree(transcript);
+        const task = extractTaskDetails(transcript);
 
         // Clean up uploaded file
         fs.unlinkSync(req.file.path);
@@ -35,4 +35,3 @@ exports.transcribeAndParse = async (req, res, next) => {
         next(err);
     }
 };
-

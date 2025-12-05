@@ -76,7 +76,7 @@ const readWavAsFloat32 = (wavPath) => {
  * @param {string} audioPath - Path to the audio file
  * @returns {Promise<string>} - Transcribed text
  */
-exports.transcribeAudioFree = async (audioPath) => {
+exports.transcribeAudio = async (audioPath) => {
     const whisper = await getTranscriber();
 
     console.log(`Converting audio to WAV format...`);
@@ -106,3 +106,4 @@ exports.transcribeAudioFree = async (audioPath) => {
 
     return result.text.trim();
 };
+

@@ -6,7 +6,7 @@ const chrono = require("chrono-node");
  * - chrono-node for date parsing ("tomorrow", "next Monday", etc.)
  * - Regex for priority and status detection
  */
-exports.extractTaskDetailsFree = (transcript) => {
+exports.extractTaskDetails = (transcript) => {
     const text = transcript.toLowerCase();
 
     // Extract due date using chrono-node
@@ -16,12 +16,14 @@ exports.extractTaskDetailsFree = (transcript) => {
         dueDate = Math.floor(parsedDate.getTime() / 1000); // Unix timestamp
     }
 
-    // Extract priority
+    // Extract priority (check LOW first to handle "not critical", "not urgent" etc.)
     let priority = "MEDIUM"; // default
-    if (text.includes("high priority") || text.includes("urgent") || text.includes("important") || text.includes("asap")) {
-        priority = "HIGH";
-    } else if (text.includes("low priority") || text.includes("not urgent") || text.includes("whenever") || text.includes("no rush")) {
+    if (text.includes("not critical") || text.includes("not urgent") || text.includes("not important") || 
+        text.includes("low priority") || text.includes("whenever") || text.includes("no rush")) {
         priority = "LOW";
+    } else if (text.includes("high priority") || text.includes("urgent") || text.includes("important") || 
+               text.includes("critical") || text.includes("asap")) {
+        priority = "HIGH";
     }
 
     // Extract status
@@ -36,9 +38,9 @@ exports.extractTaskDetailsFree = (transcript) => {
     let title = transcript
         // Remove common task prefixes
         .replace(/^(create a task|add a task|new task|task|remind me|reminder)\s*(to|for|about)?\s*/i, "")
-        // Remove priority phrases (including "It's high priority", "This is urgent", etc.)
+        // Remove priority phrases (including "It's high priority", "This is critical", etc.)
         .replace(/\b(it'?s |this is |that'?s )?(a )?(very )?(high|low|medium) priority\.?/gi, "")
-        .replace(/\b(it'?s |this is |that'?s )?(very )?(urgent|important|asap|not urgent|no rush|whenever)\.?/gi, "")
+        .replace(/\b(it'?s |this is |that'?s )?(very )?(not )?(urgent|important|critical|asap|no rush|whenever)\.?/gi, "")
         // Remove status phrases
         .replace(/\b(it'?s |this is )?(in progress|working on|started|done|completed|finished)\.?/gi, "")
         // Remove date phrases with "by/on/before next/this" patterns
@@ -77,5 +79,4 @@ exports.extractTaskDetailsFree = (transcript) => {
         rawTranscript: transcript
     };
 };
-
 
