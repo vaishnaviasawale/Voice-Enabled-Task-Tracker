@@ -107,3 +107,4 @@ exports.transcribeAudio = async (audioPath) => {
     return result.text.trim();
 };
 
+

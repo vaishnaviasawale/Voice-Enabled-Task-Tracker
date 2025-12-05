@@ -18,11 +18,11 @@ exports.extractTaskDetails = (transcript) => {
 
     // Extract priority (check LOW first to handle "not critical", "not urgent" etc.)
     let priority = "MEDIUM"; // default
-    if (text.includes("not critical") || text.includes("not urgent") || text.includes("not important") || 
+    if (text.includes("not critical") || text.includes("not urgent") || text.includes("not important") ||
         text.includes("low priority") || text.includes("whenever") || text.includes("no rush")) {
         priority = "LOW";
-    } else if (text.includes("high priority") || text.includes("urgent") || text.includes("important") || 
-               text.includes("critical") || text.includes("asap")) {
+    } else if (text.includes("high priority") || text.includes("urgent") || text.includes("important") ||
+        text.includes("critical") || text.includes("asap")) {
         priority = "HIGH";
     }
 
@@ -79,4 +79,5 @@ exports.extractTaskDetails = (transcript) => {
         rawTranscript: transcript
     };
 };
+
 
