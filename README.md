@@ -580,6 +580,7 @@ Upload audio and receive transcript with parsed task details.
 | Decision | Rationale |
 |----------|-----------|
 | **SQLite over PostgreSQL/MySQL** | Simpler setup, no external DB server needed, perfect for single-user/demo scenarios. File-based storage makes it easy to reset and share. |
+| **RDBMS over NoSQL** | Fixed fields for all data with clear relationships between them. |
 | **Local Whisper model over cloud API** | Free, no API keys required, works offline. Trade-off: ~50MB model download on first use. |
 | **JWT over session-based auth** | Stateless authentication, easier to scale, works well with React SPA. |
 | **Drizzle ORM over raw SQL** | Type-safe queries, easy schema migrations, lightweight compared to Sequelize/TypeORM. |
@@ -605,43 +606,17 @@ Upload audio and receive transcript with parsed task details.
 
 ## AI Tools Usage
 
-### Tools Used
+### Tools Used and Purpose
 
 | Tool | Purpose |
 |------|---------|
 | **Cursor IDE with Claude** | Primary development assistant for code generation and debugging|
 
-### What AI Helped With
-
-1. **Boilerplate & Setup**
-   - Express.js server configuration
-   - Drizzle ORM schema setup
-   - React Context API patterns
-   - Tailwind CSS component styling
-
-2. **Feature Implementation**
-   - Voice-to-text integration with Whisper
-   - NLP date parsing logic
-   - Drag-and-drop functionality for Kanban board
-   - JWT authentication flow
-   - Email notification templates
-
-3. **Debugging & Problem Solving**
-   - React hook dependency issues
-   - CORS configuration
-   - Audio format conversion (WebM to WAV)
-   - State management across components
-
-4. **Code Architecture**
-   - MVC pattern for backend (routes → controllers → services)
-   - Context providers for frontend state
-   - Component hierarchy decisions
 
 ### Notable Approaches
 
 - **Design-prioritise first**: Started with designing only what is required/
-  deciding a basic schema first. After that implementation, more features were
-  added
+  deciding a basic schema first for clarity
 - **Iterative development**: Started with basic CRUD, added features incrementally based on requirements
 - **Local-first**: Chose free/local alternatives (Whisper, SQLite) over paid cloud services
 - **User feedback integration**: Real-time password validation, voice transcript preview before task creation
@@ -656,6 +631,7 @@ Upload audio and receive transcript with parsed task details.
 - Unit tests
 - Task attachments
 - Add tags to group similar tasks
+- Multiple language support
 
 ---
 
