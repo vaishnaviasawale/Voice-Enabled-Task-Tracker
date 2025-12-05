@@ -11,10 +11,12 @@ A full-stack task management application with voice input capabilities, user aut
   - [Prerequisites](#prerequisites)
   - [Backend Setup](#backend-setup)
   - [Frontend Setup](#frontend-setup)
-- [Usage](#usage)
-- [API Reference](#api-reference)
+  - [Email Configuration](#email-configuration)
+  - [Running Locally](#running-locally)
+- [API Documentation](#api-documentation)
 - [Database Schema](#database-schema)
-- [Project Structure](#project-structure)
+- [Decisions and Assumptions](#decisions-and-assumptions)
+- [AI Tools Usage](#ai-tools-usage)
 - [Future Scope](#future-scope)
 
 ---
@@ -216,9 +218,16 @@ The application is fully responsive and works on mobile devices. The Kanban boar
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
-- npm (comes with Node.js)
-- Git
+| Requirement | Version/Details |
+|-------------|-----------------|
+| Node.js | v18.0.0 or higher |
+| npm | v9.0.0 or higher (comes with Node.js) |
+| Git | For cloning the repository |
+| Browser | Chrome/Firefox recommended (for voice features) |
+
+**No external database required** - SQLite is used as a file-based database, created automatically.
+
+**No API keys required for core functionality** - Voice transcription runs locally using the Whisper model. Email notifications are optional (requires free Mailtrap account).
 
 ### Backend Setup
 
@@ -273,14 +282,40 @@ The application is fully responsive and works on mobile devices. The Kanban boar
    
    Frontend will run on `http://localhost:5173`
 
----
+### Email Configuration
 
-## Usage
+Email notifications are **optional**. Without configuration, the app works fully but skips sending emails.
 
-1. Open `http://localhost:5173` in your browser
-2. Register a new account
-3. Create your first project
-4. Start adding tasks
+To enable email notifications:
+
+1. Sign up for a free account at [Mailtrap.io](https://mailtrap.io)
+2. Go to **Email Testing** → **Inboxes** → Click your inbox
+3. Select **SMTP Settings** tab → **Show Credentials**
+4. Copy the username and password to your `.env` file:
+   ```env
+   MAILTRAP_USER=your-mailtrap-username
+   MAILTRAP_PASS=your-mailtrap-password
+   ```
+
+Mailtrap is a sandbox email service - all emails are captured in your Mailtrap inbox for viewing, not sent to real email addresses. This is ideal for development and demos.
+
+### Running Locally
+
+1. Start the backend server (Terminal 1):
+   ```bash
+   cd backend
+   npm run dev
+   ```
+
+2. Start the frontend server (Terminal 2):
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+
+3. Open http://localhost:5173 in your browser
+
+**Note:** The database is created automatically on first run. No seed data is required - simply register a new user and start creating projects and tasks.
 
 ### Voice Commands
 
@@ -336,37 +371,280 @@ The voice feature uses your browser's microphone. On first use, allow microphone
 
 ---
 
-## API Reference
+## API Documentation
 
-### Authentication
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/auth/register` | Register new user |
-| POST | `/auth/login` | Login user |
-| GET | `/auth/me` | Get current user |
+Base URL: `http://localhost:5000`
 
-### Projects (Protected)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/projects` | Get all projects for user |
-| GET | `/projects/:id` | Get single project with tasks |
-| POST | `/projects` | Create new project |
-| PUT | `/projects/:id` | Update project |
-| DELETE | `/projects/:id` | Delete project (cascades to tasks) |
+All protected routes require the `Authorization` header:
+```
+Authorization: Bearer <jwt_token>
+```
 
-### Tasks (Protected)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/tasks` | Get all tasks (with filters) |
-| GET | `/tasks/:id` | Get single task |
-| POST | `/tasks` | Create new task |
-| PUT | `/tasks/:id` | Update task |
-| DELETE | `/tasks/:id` | Delete task |
+### Authentication Endpoints
 
-### Voice (Protected)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/voice/transcribe` | Upload audio, returns transcript + parsed task |
+#### POST /auth/register
+Register a new user.
+
+**Request Body:**
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "SecurePass123!"
+}
+```
+
+**Success Response (201):**
+```json
+{
+  "message": "User registered successfully",
+  "user": { "id": 1, "email": "john@example.com", "name": "John Doe" },
+  "token": "eyJhbGciOiJIUzI1NiIs..."
+}
+```
+
+**Error Response (400):**
+```json
+{
+  "error": "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, one special character"
+}
+```
+
+#### POST /auth/login
+Login an existing user.
+
+**Request Body:**
+```json
+{
+  "email": "john@example.com",
+  "password": "SecurePass123!"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "message": "Login successful",
+  "user": { "id": 1, "email": "john@example.com", "name": "John Doe" },
+  "token": "eyJhbGciOiJIUzI1NiIs..."
+}
+```
+
+**Error Response (401):**
+```json
+{
+  "error": "Invalid email or password"
+}
+```
+
+### Project Endpoints (Protected)
+
+#### GET /projects
+Get all projects for the authenticated user.
+
+**Success Response (200):**
+```json
+[
+  {
+    "id": 1,
+    "name": "My Project",
+    "description": "Project description",
+    "userId": 1,
+    "createdAt": 1733400000,
+    "tasks": [...]
+  }
+]
+```
+
+#### POST /projects
+Create a new project.
+
+**Request Body:**
+```json
+{
+  "name": "New Project",
+  "description": "Optional description"
+}
+```
+
+**Success Response (201):**
+```json
+{
+  "id": 1,
+  "name": "New Project",
+  "description": "Optional description",
+  "userId": 1,
+  "createdAt": 1733400000,
+  "tasks": []
+}
+```
+
+#### DELETE /projects/:id
+Delete a project and all its tasks.
+
+**Success Response (200):**
+```json
+{
+  "message": "Project and all associated tasks deleted",
+  "project": { "id": 1, "name": "Deleted Project" },
+  "tasksDeleted": 5
+}
+```
+
+### Task Endpoints (Protected)
+
+#### POST /tasks
+Create a new task.
+
+**Request Body:**
+```json
+{
+  "title": "Complete report",
+  "description": "Finish the quarterly report",
+  "priority": "HIGH",
+  "status": "TODO",
+  "dueDate": 1733486400,
+  "projectId": 1
+}
+```
+
+**Success Response (201):**
+```json
+{
+  "id": 1,
+  "title": "Complete report",
+  "description": "Finish the quarterly report",
+  "priority": "HIGH",
+  "status": "TODO",
+  "dueDate": 1733486400,
+  "projectId": 1,
+  "createdAt": 1733400000,
+  "updatedAt": 1733400000
+}
+```
+
+#### PUT /tasks/:id
+Update a task.
+
+**Request Body (partial update supported):**
+```json
+{
+  "status": "IN_PROGRESS"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "id": 1,
+  "title": "Complete report",
+  "status": "IN_PROGRESS",
+  "updatedAt": 1733410000
+}
+```
+
+### Voice Endpoint (Protected)
+
+#### POST /voice/transcribe
+Upload audio and receive transcript with parsed task details.
+
+**Request:** `multipart/form-data` with `audio` file field
+
+**Success Response (200):**
+```json
+{
+  "transcript": "Remind me to call the client tomorrow high priority",
+  "task": {
+    "title": "Call the client",
+    "description": "",
+    "priority": "HIGH",
+    "status": "TODO",
+    "dueDate": 1733572800
+  }
+}
+```
+
+**Error Response (400):**
+```json
+{
+  "error": "No audio file provided"
+}
+```
+
+---
+
+## Decisions and Assumptions
+
+### Key Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| **SQLite over PostgreSQL/MySQL** | Simpler setup, no external DB server needed, perfect for single-user/demo scenarios. File-based storage makes it easy to reset and share. |
+| **Local Whisper model over cloud API** | Free, no API keys required, works offline. Trade-off: ~50MB model download on first use. |
+| **JWT over session-based auth** | Stateless authentication, easier to scale, works well with React SPA. |
+| **Drizzle ORM over raw SQL** | Type-safe queries, easy schema migrations, lightweight compared to Sequelize/TypeORM. |
+| **Unix timestamps over ISO dates** | Consistent storage format, timezone-agnostic, easy arithmetic operations. |
+| **Context API over Redux** | Sufficient for this app's complexity, less boilerplate, built into React. |
+| **Mailtrap over real SMTP** | Safe for development/demos, no risk of spamming real emails, free tier available. |
+| **chrono-node for date parsing** | Robust NLP date parsing, handles relative dates ("tomorrow", "next Monday") well. |
+
+### Assumptions
+
+| Assumption | Details |
+|------------|---------|
+| **Single user per browser** | JWT stored in localStorage; no multi-account switching support. |
+| **English voice input** | Whisper model and chrono-node optimized for English language. |
+| **Modern browser required** | Uses MediaRecorder API for voice recording (Chrome/Firefox recommended). |
+| **Email addresses are valid** | No email verification implemented; users can register with any email format. |
+| **Due dates are optional** | Tasks can exist without due dates; defaults to null if not specified. |
+| **Project required for tasks** | Every task must belong to a project; no orphan tasks allowed. |
+| **No real-time collaboration** | Single-user access to projects; no WebSocket-based live updates. |
+| **Cascade delete is intentional** | Deleting a project removes all associated tasks permanently. |
+
+---
+
+## AI Tools Usage
+
+### Tools Used
+
+| Tool | Purpose |
+|------|---------|
+| **Cursor IDE with Claude** | Primary development assistant for code generation and debugging|
+
+### What AI Helped With
+
+1. **Boilerplate & Setup**
+   - Express.js server configuration
+   - Drizzle ORM schema setup
+   - React Context API patterns
+   - Tailwind CSS component styling
+
+2. **Feature Implementation**
+   - Voice-to-text integration with Whisper
+   - NLP date parsing logic
+   - Drag-and-drop functionality for Kanban board
+   - JWT authentication flow
+   - Email notification templates
+
+3. **Debugging & Problem Solving**
+   - React hook dependency issues
+   - CORS configuration
+   - Audio format conversion (WebM to WAV)
+   - State management across components
+
+4. **Code Architecture**
+   - MVC pattern for backend (routes → controllers → services)
+   - Context providers for frontend state
+   - Component hierarchy decisions
+
+### Notable Approaches
+
+- **Design-prioritise first**: Started with designing only what is required/
+  deciding a basic schema first. After that implementation, more features were
+  added
+- **Iterative development**: Started with basic CRUD, added features incrementally based on requirements
+- **Local-first**: Chose free/local alternatives (Whisper, SQLite) over paid cloud services
+- **User feedback integration**: Real-time password validation, voice transcript preview before task creation
 
 ---
 
@@ -389,4 +667,9 @@ The voice feature uses your browser's microphone. On first use, allow microphone
 - Cascade delete is implemented in application code
 - JWT tokens expire after 7 days
 - Due dates are optional and default to null if not specified
-- The Ideation folder in this repo contains the initial design though process
+- The Ideation folder in this repo contains the initial design thought process
+- A `.env.example` file is provided in the backend folder with all required
+  environment variables
+- All APIs have been tested used Postman
+- The voice input feature works has been tested to work in Google Chrome and
+  Mozilla Firefox
