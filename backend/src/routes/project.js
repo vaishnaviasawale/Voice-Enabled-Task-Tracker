@@ -1,6 +1,6 @@
 const express = require("express");
 const { db } = require("../db/db");
-const { projects } = require("../db/schema");
+const { projects, tasks } = require("../db/schema");
 const { eq } = require("drizzle-orm");
 
 const router = express.Router();
@@ -16,23 +16,35 @@ router.post("/", async (req, res, next) => {
             description: description || "",
         }).returning();
 
-        res.status(201).json(result[0]);
+        res.status(201).json({ ...result[0], tasks: [] });
     } catch (err) {
         next(err);
     }
 });
 
-// Get all projects
+// Get all projects (with their tasks)
 router.get("/", async (req, res, next) => {
     try {
         const allProjects = await db.select().from(projects);
-        res.json(allProjects);
+
+        // Fetch tasks for each project
+        const projectsWithTasks = await Promise.all(
+            allProjects.map(async (project) => {
+                const projectTasks = await db
+                    .select()
+                    .from(tasks)
+                    .where(eq(tasks.projectId, project.id));
+                return { ...project, tasks: projectTasks };
+            })
+        );
+
+        res.json(projectsWithTasks);
     } catch (err) {
         next(err);
     }
 });
 
-// Get single project by ID
+// Get single project by ID (with tasks)
 router.get("/:id", async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -47,7 +59,13 @@ router.get("/:id", async (req, res, next) => {
             return res.status(404).json({ error: "Project not found" });
         }
 
-        res.json(project[0]);
+        // Fetch tasks for this project
+        const projectTasks = await db
+            .select()
+            .from(tasks)
+            .where(eq(tasks.projectId, Number(id)));
+
+        res.json({ ...project[0], tasks: projectTasks });
     } catch (err) {
         next(err);
     }
