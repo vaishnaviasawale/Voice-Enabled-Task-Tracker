@@ -28,7 +28,7 @@ const tasks = sqliteTable("tasks", {
     description: text("description").default(""),
     priority: text("priority").default(Priority.MEDIUM),
     status: text("status").default(Status.TODO),
-    dueDate: integer("due_date").default(Math.floor(Date.now() / 1000)), // Unix timestamp
+    dueDate: integer("due_date"), // Unix timestamp, null if not set
     projectId: integer("project_id").references(() => projects.id),
     createdAt: integer("created_at").default(Math.floor(Date.now() / 1000)),
     updatedAt: integer("updated_at").default(Math.floor(Date.now() / 1000)),
