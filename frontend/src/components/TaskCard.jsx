@@ -24,7 +24,7 @@ const formatDueDate = (timestamp, status) => {
     return { formatted, isOverdue };
 };
 
-export default function TaskCard({ task, projectId }) {
+export default function TaskCard({ task, projectId, onUpdate }) {
     const [showModal, setShowModal] = useState(false);
     const dueInfo = formatDueDate(task.dueDate, task.status);
 
@@ -65,6 +65,7 @@ export default function TaskCard({ task, projectId }) {
                     task={task}
                     projectId={projectId}
                     onClose={() => setShowModal(false)}
+                    onUpdate={onUpdate}
                 />
             )}
         </>

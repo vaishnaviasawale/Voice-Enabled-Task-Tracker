@@ -1,6 +1,7 @@
 // src/components/TaskDetailModal.jsx
 import { useState } from "react";
-import { useProjects } from "../context/ProjectContext";
+
+const API_URL = "http://localhost:5000";
 
 const priorityColors = {
     LOW: "bg-green-100 text-green-800",
@@ -20,8 +21,15 @@ const statusLabels = {
     DONE: "Done",
 };
 
-export default function TaskDetailModal({ task, projectId, onClose }) {
-    const { updateTask, deleteTask, moveTask } = useProjects();
+const getAuthHeaders = () => {
+    const token = localStorage.getItem("token");
+    return {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+    };
+};
+
+export default function TaskDetailModal({ task, projectId, onClose, onUpdate }) {
     const [isEditing, setIsEditing] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
     
@@ -48,14 +56,27 @@ export default function TaskDetailModal({ task, projectId, onClose }) {
 
     const handleSave = async () => {
         try {
-            await updateTask(task.id, {
-                title,
-                description,
-                priority,
-                status,
-                dueDate: dueDate ? Math.floor(new Date(dueDate).getTime() / 1000) : null,
-                projectId,
+            const res = await fetch(`${API_URL}/tasks/${task.id}`, {
+                method: "PUT",
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    title,
+                    description,
+                    priority,
+                    status,
+                    dueDate: dueDate ? Math.floor(new Date(dueDate).getTime() / 1000) : null,
+                }),
             });
+            if (!res.ok) throw new Error("Failed to update task");
+            const updatedTask = await res.json();
+
+            // Update parent state
+            if (onUpdate) {
+                onUpdate(prev => ({
+                    ...prev,
+                    tasks: prev.tasks.map(t => t.id === task.id ? updatedTask : t)
+                }));
+            }
             setIsEditing(false);
         } catch (err) {
             console.error("Failed to update task:", err);
@@ -64,7 +85,19 @@ export default function TaskDetailModal({ task, projectId, onClose }) {
 
     const handleDelete = async () => {
         try {
-            await deleteTask(task.id, projectId);
+            const res = await fetch(`${API_URL}/tasks/${task.id}`, {
+                method: "DELETE",
+                headers: getAuthHeaders(),
+            });
+            if (!res.ok) throw new Error("Failed to delete task");
+
+            // Update parent state
+            if (onUpdate) {
+                onUpdate(prev => ({
+                    ...prev,
+                    tasks: prev.tasks.filter(t => t.id !== task.id)
+                }));
+            }
             onClose();
         } catch (err) {
             console.error("Failed to delete task:", err);
@@ -74,7 +107,22 @@ export default function TaskDetailModal({ task, projectId, onClose }) {
     // Quick status change (for mobile)
     const handleQuickStatusChange = async (newStatus) => {
         try {
-            await moveTask(projectId, task.id, newStatus);
+            const res = await fetch(`${API_URL}/tasks/${task.id}`, {
+                method: "PUT",
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ status: newStatus }),
+            });
+            if (!res.ok) throw new Error("Failed to change status");
+            
+            // Update parent state
+            if (onUpdate) {
+                onUpdate(prev => ({
+                    ...prev,
+                    tasks: prev.tasks.map(t => 
+                        t.id === task.id ? { ...t, status: newStatus } : t
+                    )
+                }));
+            }
             onClose();
         } catch (err) {
             console.error("Failed to change status:", err);
@@ -306,4 +354,3 @@ export default function TaskDetailModal({ task, projectId, onClose }) {
         </div>
     );
 }
-

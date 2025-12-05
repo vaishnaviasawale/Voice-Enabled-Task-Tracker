@@ -64,10 +64,9 @@ const checkDueDateFilter = (task, dueDateFilter) => {
     }
 };
 
-export default function TaskList({ projectId }) {
-    const { projects, searchQuery, filters } = useProjects();
+export default function TaskList({ project, onUpdate }) {
+    const { searchQuery, filters } = useProjects();
     const [selectedTask, setSelectedTask] = useState(null);
-    const project = projects.find((p) => p.id === projectId);
 
     if (!project) return <p className="p-4">Loading project...</p>;
 
@@ -176,8 +175,9 @@ export default function TaskList({ projectId }) {
             {selectedTask && (
                 <TaskDetailModal
                     task={selectedTask}
-                    projectId={projectId}
+                    projectId={project.id}
                     onClose={() => setSelectedTask(null)}
+                    onUpdate={onUpdate}
                 />
             )}
         </div>

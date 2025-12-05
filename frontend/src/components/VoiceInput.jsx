@@ -1,7 +1,9 @@
 import React, { useState, useRef } from "react";
 import VoiceTaskPreview from "./VoiceTaskPreview";
+import { useAuth } from "../context/AuthContext";
 
-const VoiceInput = ({ projectId }) => {
+const VoiceInput = ({ projectId, onTaskCreated }) => {
+    const { token } = useAuth();
     const [isRecording, setIsRecording] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [transcript, setTranscript] = useState("");
@@ -63,6 +65,9 @@ const VoiceInput = ({ projectId }) => {
 
             const res = await fetch("http://localhost:5000/voice/transcribe", {
                 method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
                 body: formData,
             });
 
@@ -167,6 +172,7 @@ const VoiceInput = ({ projectId }) => {
                     parsedTask={{ ...parsedTask, rawTranscript: transcript }}
                     projectId={projectId}
                     onClose={handleClosePreview}
+                    onTaskCreated={onTaskCreated}
                 />
             )}
         </>

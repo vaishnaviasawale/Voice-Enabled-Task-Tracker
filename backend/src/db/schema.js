@@ -14,11 +14,22 @@ const Status = {
     DONE: "DONE",
 };
 
-// Projects table
+// Users table
+const users = sqliteTable("users", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    email: text("email").notNull().unique(),
+    password: text("password").notNull(), // Hashed password
+    name: text("name").notNull(),
+    createdAt: integer("created_at").default(Math.floor(Date.now() / 1000)),
+});
+
+// Projects table (now with userId)
 const projects = sqliteTable("projects", {
     id: integer("id").primaryKey({ autoIncrement: true }),
     name: text("name").notNull(),
     description: text("description").default(""),
+    userId: integer("user_id").references(() => users.id).notNull(),
+    createdAt: integer("created_at").default(Math.floor(Date.now() / 1000)),
 });
 
 // Tasks table
@@ -37,6 +48,7 @@ const tasks = sqliteTable("tasks", {
 module.exports = {
     Priority,
     Status,
+    users,
     projects,
     tasks,
 };

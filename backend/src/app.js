@@ -10,10 +10,12 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+const authRoutes = require('./routes/auth');
 const projectRoutes = require('./routes/project');
 const taskRoutes = require('./routes/task');
 const voiceRoutes = require('./routes/voice');
 
+app.use('/auth', authRoutes);
 app.use('/projects', projectRoutes);
 app.use('/tasks', taskRoutes);
 app.use('/voice', voiceRoutes);

@@ -1,10 +1,19 @@
 // src/context/ProjectContext.jsx
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useCallback } from "react";
 
 const API_URL = "http://localhost:5000";
 
 const ProjectContext = createContext();
 export const useProjects = () => useContext(ProjectContext);
+
+// Helper to get auth headers
+const getAuthHeaders = () => {
+    const token = localStorage.getItem("token");
+    return {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+    };
+};
 
 export const ProjectProvider = ({ children }) => {
     const [projects, setProjects] = useState([]);
@@ -15,28 +24,38 @@ export const ProjectProvider = ({ children }) => {
         dueDate: "",     // "", "overdue", "today", "week", "no-date"
     });
 
-    // Fetch all projects on mount
+    // Fetch all projects for current user
     const fetchProjects = useCallback(async () => {
         try {
-            const res = await fetch(`${API_URL}/projects`);
-            if (!res.ok) throw new Error("Failed to fetch projects");
+            const res = await fetch(`${API_URL}/projects`, {
+                headers: getAuthHeaders(),
+            });
+            if (!res.ok) {
+                if (res.status === 401) {
+                    setProjects([]);
+                    return;
+                }
+                throw new Error("Failed to fetch projects");
+            }
             const data = await res.json();
             setProjects(data);
         } catch (err) {
             console.error("Error fetching projects:", err);
+            setProjects([]);
         }
     }, []);
 
-    useEffect(() => {
-        fetchProjects();
-    }, [fetchProjects]);
+    // Clear projects (on logout)
+    const clearProjects = () => {
+        setProjects([]);
+    };
 
     // Add task TO a specific project via API
     const addTask = async (projectId, taskData) => {
         try {
             const res = await fetch(`${API_URL}/tasks`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ ...taskData, projectId }),
             });
             if (!res.ok) throw new Error("Failed to create task");
@@ -62,7 +81,7 @@ export const ProjectProvider = ({ children }) => {
         try {
             const res = await fetch(`${API_URL}/tasks/${taskId}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: getAuthHeaders(),
                 body: JSON.stringify(updatedData),
             });
             if (!res.ok) throw new Error("Failed to update task");
@@ -93,7 +112,7 @@ export const ProjectProvider = ({ children }) => {
         try {
             const res = await fetch(`${API_URL}/tasks/${taskId}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ status: newStatus }),
             });
             if (!res.ok) throw new Error("Failed to move task");
@@ -121,6 +140,7 @@ export const ProjectProvider = ({ children }) => {
         try {
             const res = await fetch(`${API_URL}/tasks/${taskId}`, {
                 method: "DELETE",
+                headers: getAuthHeaders(),
             });
             if (!res.ok) throw new Error("Failed to delete task");
 
@@ -150,6 +170,7 @@ export const ProjectProvider = ({ children }) => {
                 moveTask,
                 deleteTask,
                 fetchProjects,
+                clearProjects,
                 searchQuery,
                 setSearchQuery,
                 filters,

@@ -33,13 +33,39 @@ const checkDueDateFilter = (task, dueDateFilter) => {
     }
 };
 
-export default function KanbanBoard({ projectId }) {
-    const { projects, moveTask, searchQuery, filters } = useProjects();
+const API_URL = "http://localhost:5000";
+
+export default function KanbanBoard({ project, onUpdate }) {
+    const { searchQuery, filters } = useProjects();
     const [draggedTask, setDraggedTask] = useState(null);
     const [dragOverColumn, setDragOverColumn] = useState(null);
     const columnRefs = useRef({});
 
-    const project = projects.find((p) => p.id === projectId);
+    // Local moveTask that updates parent state
+    const moveTask = async (taskId, newStatus) => {
+        const token = localStorage.getItem("token");
+        try {
+            const res = await fetch(`${API_URL}/tasks/${taskId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ status: newStatus }),
+            });
+            if (!res.ok) throw new Error("Failed to move task");
+            
+            // Update local project state
+            onUpdate(prev => ({
+                ...prev,
+                tasks: prev.tasks.map(t => 
+                    t.id === taskId ? { ...t, status: newStatus } : t
+                )
+            }));
+        } catch (err) {
+            console.error("Error moving task:", err);
+        }
+    };
 
     if (!project) return <p className="p-4">Loading project...</p>;
     if (!project.tasks) return <p>No tasks exist.</p>;
@@ -80,7 +106,7 @@ export default function KanbanBoard({ projectId }) {
         e.preventDefault();
         const taskId = Number(e.dataTransfer.getData("taskId"));
         if (taskId) {
-            moveTask(projectId, taskId, newStatus);
+            moveTask(taskId, newStatus);
         }
         setDraggedTask(null);
         setDragOverColumn(null);
@@ -115,7 +141,7 @@ export default function KanbanBoard({ projectId }) {
 
     const handleTouchEnd = () => {
         if (draggedTask && dragOverColumn && draggedTask.status !== dragOverColumn) {
-            moveTask(projectId, draggedTask.id, dragOverColumn);
+            moveTask(draggedTask.id, dragOverColumn);
         }
         setDraggedTask(null);
         setDragOverColumn(null);
@@ -179,7 +205,7 @@ export default function KanbanBoard({ projectId }) {
                                         onTouchStart={(e) => handleTouchStart(e, task)}
                                         className={`${draggedTask?.id === task.id ? "opacity-50" : ""}`}
                                     >
-                                        <TaskCard task={task} projectId={projectId} />
+                                        <TaskCard task={task} projectId={project.id} onUpdate={onUpdate} />
                                     </div>
                                 ))}
 

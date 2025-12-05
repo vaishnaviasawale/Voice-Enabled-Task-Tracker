@@ -1,9 +1,16 @@
 import React, { useState } from "react";
-import { useProjects } from "../context/ProjectContext";
 
-const TaskForm = ({ projectId, onClose }) => {
-    const { addTask } = useProjects();
+const API_URL = "http://localhost:5000";
 
+const getAuthHeaders = () => {
+    const token = localStorage.getItem("token");
+    return {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+    };
+};
+
+const TaskForm = ({ projectId, onClose, onTaskCreated }) => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [priority, setPriority] = useState("MEDIUM");
@@ -14,14 +21,27 @@ const TaskForm = ({ projectId, onClose }) => {
         if (!title.trim()) return;
 
         try {
-            await addTask(projectId, {
-                title,
-                description,
-                priority,
-                status,
-                dueDate: dueDate ? Math.floor(new Date(dueDate).getTime() / 1000) : null,
-                projectId
+            const res = await fetch(`${API_URL}/tasks`, {
+                method: "POST",
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    title,
+                    description,
+                    priority,
+                    status,
+                    dueDate: dueDate ? Math.floor(new Date(dueDate).getTime() / 1000) : null,
+                    projectId
+                }),
             });
+            
+            if (!res.ok) throw new Error("Failed to create task");
+            const newTask = await res.json();
+            
+            // Notify parent of new task
+            if (onTaskCreated) {
+                onTaskCreated(newTask);
+            }
+            
             onClose();
         } catch (err) {
             console.error("Failed to create task:", err);

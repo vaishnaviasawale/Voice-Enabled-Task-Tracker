@@ -1,16 +1,22 @@
-const { eq } = require("drizzle-orm");
+const { eq, and } = require("drizzle-orm");
 const { db } = require("../db/db");
 const { projects, tasks } = require("../db/schema");
 
-// Create a new project
+const nowUnix = () => Math.floor(Date.now() / 1000);
+
+// Create a new project (for authenticated user)
 exports.createProject = async (req, res, next) => {
     try {
         const { name, description } = req.body;
+        const userId = req.user.userId;
+
         if (!name) return res.status(400).json({ error: "Name is required" });
 
         const result = await db.insert(projects).values({
             name,
             description: description || "",
+            userId,
+            createdAt: nowUnix(),
         }).returning();
 
         res.status(201).json({ ...result[0], tasks: [] });
@@ -19,14 +25,20 @@ exports.createProject = async (req, res, next) => {
     }
 };
 
-// Get all projects (with their tasks)
+// Get all projects for authenticated user (with their tasks)
 exports.getAllProjects = async (req, res, next) => {
     try {
-        const allProjects = await db.select().from(projects);
+        const userId = req.user.userId;
+
+        // Only get projects belonging to this user
+        const userProjects = await db
+            .select()
+            .from(projects)
+            .where(eq(projects.userId, userId));
 
         // Fetch tasks for each project
         const projectsWithTasks = await Promise.all(
-            allProjects.map(async (project) => {
+            userProjects.map(async (project) => {
                 const projectTasks = await db
                     .select()
                     .from(tasks)
@@ -41,15 +53,16 @@ exports.getAllProjects = async (req, res, next) => {
     }
 };
 
-// Get single project by ID (with tasks)
+// Get single project by ID (with tasks) - only if owned by user
 exports.getProjectById = async (req, res, next) => {
     try {
         const { id } = req.params;
+        const userId = req.user.userId;
 
         const project = await db
             .select()
             .from(projects)
-            .where(eq(projects.id, Number(id)))
+            .where(and(eq(projects.id, Number(id)), eq(projects.userId, userId)))
             .limit(1);
 
         if (!project[0]) {
@@ -68,11 +81,23 @@ exports.getProjectById = async (req, res, next) => {
     }
 };
 
-// Update project by ID
+// Update project by ID - only if owned by user
 exports.updateProject = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { name, description } = req.body;
+        const userId = req.user.userId;
+
+        // Check ownership first
+        const existing = await db
+            .select()
+            .from(projects)
+            .where(and(eq(projects.id, Number(id)), eq(projects.userId, userId)))
+            .limit(1);
+
+        if (!existing[0]) {
+            return res.status(404).json({ error: "Project not found" });
+        }
 
         const updated = await db
             .update(projects)
@@ -83,27 +108,24 @@ exports.updateProject = async (req, res, next) => {
             .where(eq(projects.id, Number(id)))
             .returning();
 
-        if (!updated[0]) {
-            return res.status(404).json({ error: "Project not found" });
-        }
-
         res.json(updated[0]);
     } catch (err) {
         next(err);
     }
 };
 
-// Delete project by ID (cascade deletes all tasks)
+// Delete project by ID (cascade deletes all tasks) - only if owned by user
 exports.deleteProject = async (req, res, next) => {
     try {
         const { id } = req.params;
+        const userId = req.user.userId;
         const projectId = Number(id);
 
-        // Check if project exists
+        // Check if project exists and belongs to user
         const project = await db
             .select()
             .from(projects)
-            .where(eq(projects.id, projectId))
+            .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
             .limit(1);
 
         if (!project[0]) {
@@ -131,4 +153,3 @@ exports.deleteProject = async (req, res, next) => {
         next(err);
     }
 };
-

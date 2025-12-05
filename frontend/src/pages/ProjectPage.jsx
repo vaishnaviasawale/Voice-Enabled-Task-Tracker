@@ -5,10 +5,12 @@ import TaskList from "../components/TaskList";
 import KanbanBoard from "../components/KanbanBoard";
 import SearchBar from "../components/SearchBar";
 import VoiceInput from "../components/VoiceInput";
+import { useAuth } from "../context/AuthContext";
 
 const ProjectPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { token, loading: authLoading } = useAuth();
     const [project, setProject] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -19,22 +21,40 @@ const ProjectPage = () => {
     const toggleView = () => setIsListView((prev) => !prev);
 
     useEffect(() => {
+        // Wait for auth to finish loading before fetching
+        if (authLoading) return;
+        
+        // If no token after auth loaded, don't fetch
+        if (!token) {
+            setLoading(false);
+            setError("Not authenticated");
+            return;
+        }
+
         const fetchProject = async () => {
             try {
-                const res = await fetch(`http://localhost:5000/projects/${id}`);
-                if (!res.ok) throw new Error("Project not found");
+                const res = await fetch(`http://localhost:5000/projects/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || "Project not found");
+                }
                 const data = await res.json();
                 setProject(data);
             } catch (err) {
+                console.error("Error fetching project:", err);
                 setError(err.message);
             } finally {
                 setLoading(false);
             }
         };
         fetchProject();
-    }, [id]);
+    }, [id, token, authLoading]);
 
-    if (loading) return <p className="p-4">Loading...</p>;
+    if (authLoading || loading) return <p className="p-4">Loading...</p>;
     if (error) return <p className="p-4 text-red-500">{error}</p>;
 
     return (
@@ -61,7 +81,15 @@ const ProjectPage = () => {
                     Add Task
                 </button>
 
-                <VoiceInput projectId={project.id} />
+                <VoiceInput 
+                    projectId={project.id} 
+                    onTaskCreated={(newTask) => {
+                        setProject(prev => ({
+                            ...prev,
+                            tasks: [...(prev.tasks || []), newTask]
+                        }));
+                    }}
+                />
 
                 <button
                     onClick={toggleView}
@@ -75,9 +103,9 @@ const ProjectPage = () => {
 
             {/* Task View */}
             {isListView ? (
-                <TaskList projectId={project.id} />
+                <TaskList project={project} onUpdate={setProject} />
             ) : (
-                <KanbanBoard projectId={project.id} />
+                <KanbanBoard project={project} onUpdate={setProject} />
             )}
 
             {/* Task Form Modal */}
@@ -85,6 +113,12 @@ const ProjectPage = () => {
                 <TaskForm
                     projectId={project.id}
                     onClose={() => setShowTaskModal(false)}
+                    onTaskCreated={(newTask) => {
+                        setProject(prev => ({
+                            ...prev,
+                            tasks: [...(prev.tasks || []), newTask]
+                        }));
+                    }}
                 />
             )}
         </div>
