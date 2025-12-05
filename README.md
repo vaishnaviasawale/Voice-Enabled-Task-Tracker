@@ -627,11 +627,16 @@ Upload audio and receive transcript with parsed task details.
 
 - Assignee/Reporter fields on tasks
 - Task dependencies (Depends On, Blocked By)
+- Clone tasks
 - Team/workspace shared collaboration
 - Unit tests
 - Task attachments
 - Add tags to group similar tasks
 - Multiple language support
+- Offline support
+- Track tasks by week 
+- Allow sharing of tasks via another medium
+- Allow comments on tasks
 
 ---
 
