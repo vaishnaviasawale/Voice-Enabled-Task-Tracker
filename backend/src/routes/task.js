@@ -34,7 +34,7 @@ router.post("/", async (req, res, next) => {
                 description: description || "",
                 priority: validatedPriority,
                 status: validatedStatus,
-                dueDate: dueDate ? Number(dueDate) : nowUnix(),
+                dueDate: dueDate ? Number(dueDate) : null,
                 projectId: projectId ? Number(projectId) : null,
                 createdAt: nowUnix(),
                 updatedAt: nowUnix(),
@@ -117,7 +117,7 @@ router.put("/:id", async (req, res, next) => {
                 ...(description !== undefined && { description }),
                 ...(priority !== undefined && { priority }),
                 ...(status !== undefined && { status }),
-                ...(dueDate !== undefined && { dueDate: Number(dueDate) }),
+                ...(dueDate !== undefined && { dueDate: dueDate ? Number(dueDate) : null }),
                 ...(projectId !== undefined && { projectId: projectId === null ? null : Number(projectId) }),
                 updatedAt: nowUnix(),
             })
