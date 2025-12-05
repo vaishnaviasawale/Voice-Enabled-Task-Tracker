@@ -1,39 +1,34 @@
 // backend/src/app.js
-const express = require('express')
-const cors = require('cors')
+const express = require('express');
+const cors = require('cors');
+const errorHandler = require('./middleware/errorHandler');
 
-const app = express()
+const app = express();
 
 // Middleware
-app.use(cors())
-app.use(express.json())
+app.use(cors());
+app.use(express.json());
 
-// Project routes
+// Routes
 const projectRoutes = require('./routes/project');
-app.use('/projects', projectRoutes);
-
-// Task routes
 const taskRoutes = require('./routes/task');
-app.use('/tasks', taskRoutes);
+const voiceRoutes = require('./routes/voice');
 
-// Voice routes
-const voiceRoutes = require("./routes/voice");
+app.use('/projects', projectRoutes);
+app.use('/tasks', taskRoutes);
 app.use('/voice', voiceRoutes);
 
 // Home route
 app.get('/', (req, res) => {
-    res.send('Voice-Enabled Task Tracker Backend is running')
-})
+    res.send('Voice-Enabled Task Tracker Backend is running');
+});
 
 // 404 handler
-app.use((req, res, next) => {
-    res.status(404).send({ error: 'Not found' })
-})
+app.use((req, res) => {
+    res.status(404).json({ error: 'Not found' });
+});
 
 // Global error handler
-app.use((err, req, res, next) => {
-    console.error(err.stack)
-    res.status(500).send({ error: 'Something went wrong!' })
-})
+app.use(errorHandler);
 
-module.exports = app
+module.exports = app;

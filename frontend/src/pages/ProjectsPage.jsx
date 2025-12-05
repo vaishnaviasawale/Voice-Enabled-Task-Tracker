@@ -1,24 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useProjects } from "../context/ProjectContext";
 
 export default function ProjectsPage() {
-    const [projects, setProjects] = useState([]);
+    const { projects, fetchProjects } = useProjects();
     const [showModal, setShowModal] = useState(false);
     const [newProjectName, setNewProjectName] = useState("");
     const [newProjectDesc, setNewProjectDesc] = useState("");
 
     const navigate = useNavigate();
-
-    // Fetch all projects from backend
-    const fetchProjects = async () => {
-        const res = await fetch("http://localhost:5000/projects");
-        const data = await res.json();
-        setProjects(data);
-    };
-
-    useEffect(() => {
-        fetchProjects();
-    }, []);
 
     // Create new project using backend POST
     const createProject = async () => {
@@ -43,7 +33,7 @@ export default function ProjectsPage() {
         setNewProjectDesc("");
         setShowModal(false);
 
-        // Reload list so new project appears
+        // Reload context so new project is available everywhere
         await fetchProjects();
     };
 
