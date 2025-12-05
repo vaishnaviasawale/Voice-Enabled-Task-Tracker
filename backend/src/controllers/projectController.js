@@ -93,23 +93,39 @@ exports.updateProject = async (req, res, next) => {
     }
 };
 
-// Delete project by ID
+// Delete project by ID (cascade deletes all tasks)
 exports.deleteProject = async (req, res, next) => {
     try {
         const { id } = req.params;
+        const projectId = Number(id);
 
-        const deleted = await db
-            .delete(projects)
-            .where(eq(projects.id, Number(id)))
-            .returning();
+        // Check if project exists
+        const project = await db
+            .select()
+            .from(projects)
+            .where(eq(projects.id, projectId))
+            .limit(1);
 
-        if (!deleted[0]) {
+        if (!project[0]) {
             return res.status(404).json({ error: "Project not found" });
         }
 
+        // Delete all tasks associated with this project first
+        const deletedTasks = await db
+            .delete(tasks)
+            .where(eq(tasks.projectId, projectId))
+            .returning();
+
+        // Delete the project
+        const deleted = await db
+            .delete(projects)
+            .where(eq(projects.id, projectId))
+            .returning();
+
         res.json({
-            message: "Project deleted",
+            message: "Project and all associated tasks deleted",
             project: deleted[0],
+            tasksDeleted: deletedTasks.length,
         });
     } catch (err) {
         next(err);
