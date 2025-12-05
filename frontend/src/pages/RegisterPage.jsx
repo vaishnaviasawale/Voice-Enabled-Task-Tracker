@@ -1,6 +1,17 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+
+// Password validation helper
+const validatePassword = (password) => {
+    return {
+        minLength: password.length >= 8,
+        hasUppercase: /[A-Z]/.test(password),
+        hasLowercase: /[a-z]/.test(password),
+        hasNumber: /[0-9]/.test(password),
+        hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    };
+};
 
 export default function RegisterPage() {
     const [name, setName] = useState("");
@@ -13,6 +24,10 @@ export default function RegisterPage() {
     const { register } = useAuth();
     const navigate = useNavigate();
 
+    // Check password requirements in real-time
+    const passwordChecks = useMemo(() => validatePassword(password), [password]);
+    const isPasswordValid = Object.values(passwordChecks).every(Boolean);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
@@ -23,8 +38,8 @@ export default function RegisterPage() {
             return;
         }
 
-        if (password.length < 6) {
-            setError("Password must be at least 6 characters");
+        if (!isPasswordValid) {
+            setError("Password does not meet all requirements");
             return;
         }
 
@@ -95,10 +110,34 @@ export default function RegisterPage() {
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
+                                placeholder="Enter password"
                                 required
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                             />
+
+                            {/* Password Requirements */}
+                            {password && (
+                                <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                                    <p className="text-xs font-medium text-gray-600 mb-2">Password must contain:</p>
+                                    <div className="grid grid-cols-2 gap-1 text-xs">
+                                        <div className={passwordChecks.minLength ? "text-green-600" : "text-gray-400"}>
+                                            {passwordChecks.minLength ? "+" : "-"} 8+ characters
+                                        </div>
+                                        <div className={passwordChecks.hasUppercase ? "text-green-600" : "text-gray-400"}>
+                                            {passwordChecks.hasUppercase ? "+" : "-"} Uppercase letter
+                                        </div>
+                                        <div className={passwordChecks.hasLowercase ? "text-green-600" : "text-gray-400"}>
+                                            {passwordChecks.hasLowercase ? "+" : "-"} Lowercase letter
+                                        </div>
+                                        <div className={passwordChecks.hasNumber ? "text-green-600" : "text-gray-400"}>
+                                            {passwordChecks.hasNumber ? "+" : "-"} Number
+                                        </div>
+                                        <div className={passwordChecks.hasSpecial ? "text-green-600" : "text-gray-400"}>
+                                            {passwordChecks.hasSpecial ? "+" : "-"} Special char (!@#$%)
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div>
@@ -109,15 +148,18 @@ export default function RegisterPage() {
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                placeholder="••••••••"
+                                placeholder="Confirm password"
                                 required
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                             />
+                            {confirmPassword && password !== confirmPassword && (
+                                <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
+                            )}
                         </div>
 
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || !isPasswordValid || password !== confirmPassword}
                             className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all disabled:bg-blue-400 disabled:cursor-not-allowed"
                         >
                             {loading ? "Creating account..." : "Create Account"}
@@ -136,6 +178,3 @@ export default function RegisterPage() {
         </div>
     );
 }
-
-
-

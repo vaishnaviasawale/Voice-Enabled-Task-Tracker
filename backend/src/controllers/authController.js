@@ -9,6 +9,29 @@ const JWT_EXPIRES_IN = "7d";
 
 const nowUnix = () => Math.floor(Date.now() / 1000);
 
+// Password validation helper
+const validatePassword = (password) => {
+    const errors = [];
+
+    if (password.length < 8) {
+        errors.push("at least 8 characters");
+    }
+    if (!/[A-Z]/.test(password)) {
+        errors.push("one uppercase letter");
+    }
+    if (!/[a-z]/.test(password)) {
+        errors.push("one lowercase letter");
+    }
+    if (!/[0-9]/.test(password)) {
+        errors.push("one number");
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        errors.push("one special character (!@#$%^&*)");
+    }
+
+    return errors;
+};
+
 // Register new user
 exports.register = async (req, res, next) => {
     try {
@@ -19,8 +42,12 @@ exports.register = async (req, res, next) => {
             return res.status(400).json({ error: "Email, password, and name are required" });
         }
 
-        if (password.length < 6) {
-            return res.status(400).json({ error: "Password must be at least 6 characters" });
+        // Password strength validation
+        const passwordErrors = validatePassword(password);
+        if (passwordErrors.length > 0) {
+            return res.status(400).json({
+                error: `Password must contain ${passwordErrors.join(", ")}`
+            });
         }
 
         // Check if user already exists
