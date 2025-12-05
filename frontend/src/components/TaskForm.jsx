@@ -33,15 +33,15 @@ const TaskForm = ({ projectId, onClose, onTaskCreated }) => {
                     projectId
                 }),
             });
-            
+
             if (!res.ok) throw new Error("Failed to create task");
             const newTask = await res.json();
-            
+
             // Notify parent of new task
             if (onTaskCreated) {
                 onTaskCreated(newTask);
             }
-            
+
             onClose();
         } catch (err) {
             console.error("Failed to create task:", err);

@@ -1,17 +1,7 @@
 const nodemailer = require("nodemailer");
 
-// Using Mailtrap - Debug what credentials are loaded
-console.log("Email config check:", {
-    hasMailtrapUser: !!process.env.MAILTRAP_USER,
-    hasMailtrapPass: !!process.env.MAILTRAP_PASS,
-    // Show first few chars to verify format (don't log full credentials!)
-    userPreview: process.env.MAILTRAP_USER?.substring(0, 4) + "...",
-});
-
 const createTransporter = () => {
-    // Check if using Mailtrap
     if (process.env.MAILTRAP_USER && process.env.MAILTRAP_PASS) {
-        console.log("Mailtrap configured - emails will be sent to Mailtrap inbox");
         return nodemailer.createTransport({
             host: "sandbox.smtp.mailtrap.io",
             port: 2525,
@@ -22,8 +12,6 @@ const createTransporter = () => {
         });
     }
 
-    // No config - return null (will log emails to console)
-    console.log("No Mailtrap credentials found. Add MAILTRAP_USER and MAILTRAP_PASS to .env");
     return null;
 };
 
@@ -151,14 +139,14 @@ const sendEmail = async (to, template, data) => {
 
         // If no transporter configured, log to console instead
         if (!transporter) {
-            console.log("📧 EMAIL (console only - no Mailtrap config):");
+            console.log("EMAIL (console only - no Mailtrap config):");
             console.log("   To:", to);
             console.log("   Subject:", emailContent.subject);
             return { messageId: "console-only" };
         }
 
         const result = await transporter.sendMail(mailOptions);
-        console.log(`📧 Email sent to Mailtrap: ${template} to ${to}`);
+        console.log(`Email sent to Mailtrap: ${template} to ${to}`);
         return result;
     } catch (err) {
         console.error("Failed to send email:", err.message);

@@ -37,7 +37,7 @@ exports.createTask = async (req, res, next) => {
         const validatedPriority = Object.values(Priority).includes(priority) ? priority : Priority.MEDIUM;
         const validatedStatus = Object.values(Status).includes(status) ? status : Status.TODO;
 
-        // Optional project check
+        // Project check
         if (projectId !== undefined && projectId !== null) {
             const proj = await db.select().from(projects).where(eq(projects.id, Number(projectId))).limit(1);
             if (!proj[0]) return res.status(400).json({ error: "projectId does not exist" });
@@ -59,7 +59,7 @@ exports.createTask = async (req, res, next) => {
 
         const newTask = inserted[0];
 
-        // Send email notification (async, don't wait)
+        // Send email notification (async)
         const { userEmail, projectName } = await getNotificationContext(projectId, userId);
         if (userEmail) {
             sendEmail(userEmail, "taskCreated", [newTask, projectName]);
@@ -163,11 +163,11 @@ exports.updateTask = async (req, res, next) => {
         );
 
         if (userEmail) {
-            // Check if it's just a status change (common action)
+            // Check if it's  a status change
             if (status && oldTask.status !== status && Object.keys(req.body).length <= 2) {
                 sendEmail(userEmail, "taskStatusChanged", [updatedTask, projectName, oldTask.status, status]);
             } else {
-                // General update - list what changed
+                // List what changed
                 const changes = [];
                 if (title && oldTask.title !== title) changes.push(`Title: "${oldTask.title}" → "${title}"`);
                 if (description !== undefined && oldTask.description !== description) changes.push("Description updated");

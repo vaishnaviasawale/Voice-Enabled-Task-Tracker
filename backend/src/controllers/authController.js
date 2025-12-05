@@ -4,7 +4,7 @@ const { eq } = require("drizzle-orm");
 const { db } = require("../db/db");
 const { users } = require("../db/schema");
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = "7d";
 
 const nowUnix = () => Math.floor(Date.now() / 1000);

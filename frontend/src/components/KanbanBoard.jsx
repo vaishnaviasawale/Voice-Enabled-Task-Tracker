@@ -54,11 +54,11 @@ export default function KanbanBoard({ project, onUpdate }) {
                 body: JSON.stringify({ status: newStatus }),
             });
             if (!res.ok) throw new Error("Failed to move task");
-            
+
             // Update local project state
             onUpdate(prev => ({
                 ...prev,
-                tasks: prev.tasks.map(t => 
+                tasks: prev.tasks.map(t =>
                     t.id === taskId ? { ...t, status: newStatus } : t
                 )
             }));

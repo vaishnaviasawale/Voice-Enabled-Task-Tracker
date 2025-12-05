@@ -11,13 +11,13 @@ ffmpeg.setFfmpegPath(ffmpegPath);
 
 let transcriber = null;
 
-// Initialize the Whisper model (downloads on first use ~150MB)
+// Initialize the Whisper model
 const getTranscriber = async () => {
     if (!transcriber) {
         console.log("Loading Whisper model (first time may take a minute to download)...");
         transcriber = await pipeline(
             "automatic-speech-recognition",
-            "Xenova/whisper-tiny.en" // Small English model, ~150MB
+            "Xenova/whisper-tiny.en" // Small English model
         );
         console.log("Whisper model loaded!");
     }
