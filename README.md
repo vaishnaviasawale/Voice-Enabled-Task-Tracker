@@ -4,8 +4,8 @@ A full-stack task management application with voice input capabilities, user aut
 
 ## Table of Contents
 
-- [Screenshots](#screenshots)
 - [Features](#features)
+- [Feature Breakdown](#feature-breakdown)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
@@ -20,6 +20,115 @@ A full-stack task management application with voice input capabilities, user aut
 ---
 
 ## Features
+
+### 1. User Registration
+Sign up with email and password. Password must meet security requirements: minimum 8 characters, uppercase, lowercase, number, and special character. Real-time validation feedback is provided.
+
+![Sign Up Page](./screenshots/signUp.png)
+
+### 2. User Login
+Secure login with email and password. JWT-based authentication with 7-day token expiry.
+
+![Sign In Page](./screenshots/signIn.png)
+
+### 3. Home Page
+View all your projects at a glance. First-time users see an empty state with a prompt to create their first project.
+
+![Initial Home Page](./screenshots/initialHome.png)
+
+### 4. Create Project
+Create a new project with a name and optional description.
+
+![Create Project](./screenshots/createProject.png)
+
+### 5. Edit Project
+Edit an existing project's name or description by clicking the edit icon on hover.
+
+![Edit Project](./screenshots/editProject.png)
+
+### 6. Delete Project
+Delete a project with a confirmation warning. Deleting a project will also delete all tasks associated with it.
+
+![Delete Project](./screenshots/deleteProject.png)
+
+### 7. Project List
+All projects are displayed with their task count. Hover over a project card to reveal edit and delete options.
+
+![Project View](./screenshots/projectView.png)
+
+### 8. Project Dashboard
+Click on a project to enter the project view. Default view is the Kanban board style. Add and manage tasks from here. You can also go back to the Project List view using the "Back to Projects" button.
+
+![Project Home](./screenshots/initialProjectHome.png)
+
+### 9. Voice Task Creation
+Create tasks using voice commands. The system:
+- Transcribes your speech and displays it for verification
+- Intelligently extracts task details from natural language
+- Understands relative dates like "tomorrow", "next Monday", "in 3 days"
+- Detects priority keywords like "urgent", "high priority", "critical"
+- Defaults to "TO DO" status and "MEDIUM" priority if not specified
+- Allows editing before final creation
+
+**Example:** "Remind me to send the project proposal to the client by next Wednesday, it's high priority"
+
+![Voice Input](./screenshots/voiceInput.png)
+
+### 10. Manual Task Creation
+Create tasks manually with full control over all fields: title, description, status, priority, and due date.
+
+![Create Task](./screenshots/createTask.png)
+
+### 11. Edit Task
+Click on any task to view and edit its details. The last updated timestamp is displayed on the task.
+
+![Edit Task](./screenshots/editTask.png)
+
+### 12. Delete Task
+Delete tasks with a confirmation prompt to prevent accidental deletion.
+
+![Delete Task](./screenshots/deleteTask.png)
+
+### 13. Search and Filter
+Search tasks by keywords in title or description. Filter by one or more criteria:
+- Status (To Do, In Progress, Done)
+- Priority (Low, Medium, High)
+- Due Date (Overdue, Today, This Week, No Date)
+
+![Search Feature](./screenshots/searchFeature.png)
+
+### 14. Kanban Board View
+Default view with drag-and-drop functionality. Move tasks between columns (To Do, In Progress, Done) by dragging. Touch support available for mobile devices.
+
+![Board View](./screenshots/boardView.png)
+
+### 15. List View
+Alternative table view showing all task details in a structured format. Click on any row to view/edit the task.
+
+![List View](./screenshots/listView.png)
+
+### 16. Overdue Indicators and Quick Status Change
+Tasks with past due dates are highlighted in red in both views. Click on a task to quickly change its status using the "Move to" buttons.
+
+![Task View](./screenshots/taskView.png)
+
+### 17. Email Notifications
+Automated email notifications are sent via Mailtrap for:
+- Task created
+- Task updated (with list of changes)
+- Task status changed
+- Task deleted
+
+![Emails Sent](./screenshots/emailsSent.png)
+
+### 18. Responsive Design
+The application is fully responsive and works on mobile devices. The Kanban board supports touch-based drag-and-drop for moving tasks between columns on tablets and phones.
+
+![Responsive Design](./screenshots/responsiveDesign.png)
+
+---
+
+## Feature Breakdown
 
 ### Task Management
 - Create, Read, Update, Delete tasks
@@ -184,40 +293,6 @@ The voice feature uses your browser's microphone. On first use, allow microphone
 
 ---
 
-## API Reference
-
-### Authentication
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/auth/register` | Register new user |
-| POST | `/auth/login` | Login user |
-| GET | `/auth/me` | Get current user |
-
-### Projects (Protected)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/projects` | Get all projects for user |
-| GET | `/projects/:id` | Get single project with tasks |
-| POST | `/projects` | Create new project |
-| PUT | `/projects/:id` | Update project |
-| DELETE | `/projects/:id` | Delete project (cascades to tasks) |
-
-### Tasks (Protected)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/tasks` | Get all tasks (with filters) |
-| GET | `/tasks/:id` | Get single task |
-| POST | `/tasks` | Create new task |
-| PUT | `/tasks/:id` | Update task |
-| DELETE | `/tasks/:id` | Delete task |
-
-### Voice (Protected)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/voice/transcribe` | Upload audio, returns transcript + parsed task |
-
----
-
 ## Database Schema
 
 ### Users Table
@@ -261,14 +336,48 @@ The voice feature uses your browser's microphone. On first use, allow microphone
 
 ---
 
+## API Reference
+
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/auth/register` | Register new user |
+| POST | `/auth/login` | Login user |
+| GET | `/auth/me` | Get current user |
+
+### Projects (Protected)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/projects` | Get all projects for user |
+| GET | `/projects/:id` | Get single project with tasks |
+| POST | `/projects` | Create new project |
+| PUT | `/projects/:id` | Update project |
+| DELETE | `/projects/:id` | Delete project (cascades to tasks) |
+
+### Tasks (Protected)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/tasks` | Get all tasks (with filters) |
+| GET | `/tasks/:id` | Get single task |
+| POST | `/tasks` | Create new task |
+| PUT | `/tasks/:id` | Update task |
+| DELETE | `/tasks/:id` | Delete task |
+
+### Voice (Protected)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/voice/transcribe` | Upload audio, returns transcript + parsed task |
+
+---
+
 ## Future Scope
 
 - Assignee/Reporter fields on tasks
 - Task dependencies (Depends On, Blocked By)
-- Team/workspace collaboration
+- Team/workspace shared collaboration
 - Unit tests
 - Task attachments
-- Due date reminders
+- Add tags to group similar tasks
 
 ---
 

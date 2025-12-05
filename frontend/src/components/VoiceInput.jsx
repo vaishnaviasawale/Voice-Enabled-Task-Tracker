@@ -102,10 +102,10 @@ const VoiceInput = ({ projectId, onTaskCreated }) => {
                 onClick={isRecording ? stopRecording : startRecording}
                 disabled={isProcessing}
                 className={`px-4 py-2 rounded-lg text-white font-medium transition-all flex items-center gap-2 ${isProcessing
-                        ? "bg-gray-400 cursor-wait"
-                        : isRecording
-                            ? "bg-red-500 hover:bg-red-600 animate-pulse"
-                            : "bg-purple-600 hover:bg-purple-700"
+                    ? "bg-gray-400 cursor-wait"
+                    : isRecording
+                        ? "bg-red-500 hover:bg-red-600 animate-pulse"
+                        : "bg-purple-600 hover:bg-purple-700"
                     }`}
             >
                 {isProcessing ? (
@@ -126,7 +126,7 @@ const VoiceInput = ({ projectId, onTaskCreated }) => {
                     </>
                 ) : (
                     <>
-                        🎤 Voice Task
+                        Voice Task
                     </>
                 )}
             </button>

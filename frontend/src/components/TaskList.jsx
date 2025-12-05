@@ -157,7 +157,7 @@ export default function TaskList({ project, onUpdate }) {
                                 {/* Due Date */}
                                 <div className="col-span-2">
                                     <span className={`text-sm ${dueInfo.isOverdue ? "text-red-600 font-medium" : "text-gray-600"}`}>
-                                        {dueInfo.isOverdue && "⚠ "}{dueInfo.formatted}
+                                        {dueInfo.formatted}
                                     </span>
                                 </div>
 
